@@ -1,0 +1,141 @@
+//Helper function to any functions requiring search 
+//Takes in title name
+//Return: a pointer to the Movie that has the title name
+//		,NULL if none is found
+Movie::MovieNode* getMovieNodebyTitle(const string& title) const{       
+	MovieNode* p = root;
+        while(p){
+                //Check if title matches
+                int temp = (p->title).compare(title);
+                if(temp==0)
+                    return p;
+                else if(temp>0) //node title is greater than title param
+                    p=p->left;
+                else            //node title is less than title param
+                    p=p->right;
+        }
+
+        //If reach end of BST return NULL.
+        return NULL;
+}
+
+Movie::MovieNode* getSuccessor(MovieNode* node) const{
+    	MovieNode* tmp = getMovieNodebyTitle(node->title);
+    	if(!tmp)
+        	return NULL;
+
+    	MovieNode* srch = tmp->right;
+    	MovieNode* srchUp = tmp->parent;
+
+    	if(srch){
+       		while(srch->left){
+	    		srch=srch->left;	    
+        	}
+		return srch;
+    	}
+    	
+    	else if(!srch){
+		    MovieNode* prev = tmp;
+		    while(srchUp&&srchUp->left!=prev){
+	    		prev=srchUp;
+	    		srchUp=srchUp->parent;
+		    }
+		    return srchUp;
+    	}
+    	else{
+    		return NULL;	
+	}
+}
+Movie::MovieNode* getPredecessor(MovieNode* node) const{
+ 	MovieNode* tmp = getMoviebyTitle(node->title);
+    	if(!tmp)
+        	return NULL;
+
+    	MovieNode* search = tmp->left;
+    	MovieNode* searchUp = tmp->parent;
+
+    	if(search){
+       		while(search->right){
+	    		search=search->right;	    
+        	}
+		return search;
+    	}
+    	else if(!search){
+		MovieNode* prev = tmp;
+		while(searchUp){
+	    		if(searchUp->right==prev)
+	        		return searchUp;
+	    		prev=searchUp;
+	    		searchUp=searchUp->parent;
+		}
+    	}
+    
+    	return NULL;	
+}
+
+MovieNode::MovieNode* getHighestReviewMovieNodeByPrefix(const string& prefix){
+    double max=-1.0;
+    Node* maxReviewPrefixNode;
+    Node* tmp = root;
+    Node* prefixNode;
+    //find first node with the prefix
+    while(tmp!=NULL){
+        if(prefix.length()>(tmp->title).length())
+            tmp=tmp->right;
+        else{
+            int c = prefix.compare((tmp->title).substr(0,prefix.length()));
+            if(c==0){
+                maxReviewPrefixNode=tmp;    //Set up MovieNode* and max rating value.
+                prefixNode=tmp;
+                max=prefixNode->rating;
+                break;
+            }
+            else if(c>0){   //Prefix is greater than prefix of node
+                tmp=tmp->right;
+            }
+            else{
+                tmp=tmp->left;  //Prefix is less than prefix of node
+            }
+        }
+        return NULL;     //None found, no movies start with that prefix
+    }
+    
+    //Store highest reviewed movie predecessor.
+    while(prefixNode){
+        int c = prefix.compare((prefixNode->title).substr(0,prefix.length()));
+        if(c==0){
+            if(prefixNode->rating>max){             //Update max and maxReviewPrefixNode
+                prefixNode->rating=max;
+                maxReviewPrefixNode=prefixNode;
+            }
+            prefixNode=getPredecessor(prefixNode);
+        }
+        else{
+            break;
+        }
+    }
+    
+    //Store highest reviewed movie successor.
+    while(prefixNode){
+        int c = prefix.compare((prefixNode->title).substr(0,prefix.length()));
+        if(c==0){
+            if(prefixNode->rating>max){             //Update max and maxReviewPrefixNode
+                prefixNode->rating=max;
+                maxReviewPrefixNode=prefixNode;
+            }
+            prefixNode=getSuccessor(prefixNode);
+        }
+        else{
+            break;
+        }
+    }
+    
+    //Return maxReviewPrefixNode
+    return maxReviewPrefixNode;
+}
+
+
+
+
+
+
